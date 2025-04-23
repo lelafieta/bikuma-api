@@ -15,16 +15,17 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   firstName String?
   lastName  String?
   fullName  String?
-  email     String   @unique
-  password  String
-  role      Role     @default(USER)
+  email     String     @unique
+  role      Role       @default(USER)
   profile   Profile?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  Campaign  Campaign[]
+  Ong       Ong[]
 
   @@map("users")
 }
@@ -68,6 +69,8 @@ model Campaign {
   imageCoverUrl         String?
   institution           String?
   location              String?
+  latitude              Float?
+  longitude             Float?
   numberOfContributions Int?
   phoneNumber           String?
   priority              Int?      @default(0)
@@ -78,12 +81,60 @@ model Campaign {
   campaignType          String?
   currency              String    @default("AOA")
   birth                 DateTime?
-
-  categoryId String?
-  ongId      String?
-  userId     String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
+  categoryId            Int?
+  ongId                 Int?
+  userId                Int?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @default(now())
+  Category              Category? @relation(fields: [categoryId], references: [id])
+  User                  User?     @relation(fields: [userId], references: [id])
+  Ong                   Ong?      @relation(fields: [ongId], references: [id])
 
   @@map("campaigns")
+}
+
+model Category {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  Campaign    Campaign[]
+
+  @@map("categories")
+}
+
+model Ong {
+  id              Int        @id @default(autoincrement())
+  about           String?
+  bio             String?
+  coverImageUrl   String?
+  isVerified      Boolean?   @default(false)
+  mission         String?
+  name            String?
+  phoneNumber     String?
+  profileImageUrl String?
+  servicesNumber  BigInt?    @default(0)
+  supportsNumber  BigInt?    @default(0)
+  vision          String?
+  status          Status     @default(pending)
+  email           String?
+  website         String?
+  location        String?
+  latitude        Float?
+  longitude       Float?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime?  @default(now())
+  userId          Int
+  user            User?      @relation(fields: [userId], references: [id])
+  Campaign        Campaign[]
+
+  @@map("ongs")
+}
+
+enum Status {
+  pending
+  active
+  inactive
+  failed
+  canceled
 }
