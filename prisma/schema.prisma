@@ -14,351 +14,76 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Blog {
-  id          String    @id @default(uuid())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime?
-  description String?
-  title       String?
-  image       String?
+model User {
+  id        Int      @id @default(autoincrement())
+  firstName String?
+  lastName  String?
+  fullName  String?
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  profile   Profile?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 
-  userId String?
-  ongId  String?
-  User   User?   @relation(fields: [userId], references: [id])
-  Ong    Ong?    @relation(fields: [ongId], references: [id])
-
-  @@map("blogs")
+  @@map("users")
 }
 
-model CampaignComment {
-  id          String    @id @default(uuid())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime?
-  description String?
-
-  userId     String?
-  campaignId String?
-
-  user     User?     @relation(fields: [userId], references: [id])
-  campaign Campaign? @relation(fields: [campaignId], references: [id])
-
-  @@map("campaign_comments")
+enum Role {
+  RECIPIENT
+  USER
+  ADMIN
+  ROOT
+  CAMPAIGNMANAGER
+  MODERATOR
+  SUPPORT
+  VOLUNTEER
+  DONOR
 }
 
-model CampaignContributor {
-  id          String    @id @default(uuid())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
-  campaignId  String?
-  userId      String?
-  money       Float?    @default(0)
-  isAnonymous Boolean?  @default(false)
+model Profile {
+  id          Int      @id @default(autoincrement())
+  avatarUrl   String?
+  bio         String?
+  location    String?
+  isVerified  Boolean? @default(false)
+  phoneNumber String?
+  donationQtd BigInt   @default(0)
+  campaignQtd BigInt   @default(0)
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int      @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
 
-  campaign Campaign? @relation(fields: [campaignId], references: [id])
-  user     User?     @relation(fields: [userId], references: [id])
-
-  @@map("campaign_contributors")
-}
-
-model CampaignDocument {
-  id           String    @id @default(uuid())
-  createdAt    DateTime  @default(now())
-  documentPath String?
-  updatedAt    DateTime? @updatedAt
-  campaignId   String?
-  userId       String?
-  isApproved   Boolean?  @default(false)
-
-  campaign Campaign? @relation(fields: [campaignId], references: [id])
-  user     User?     @relation(fields: [userId], references: [id])
-
-  @@map("campaign_documents")
-}
-
-model CampaignMidia {
-  id         String        @id @default(uuid())
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime?     @updatedAt
-  userId     String?
-  campaignId String?
-  midiaUrl   String?
-  midiaType  MidiaTypeEnum @default(image)
-
-  campaign Campaign? @relation(fields: [campaignId], references: [id])
-  user     User?     @relation(fields: [userId], references: [id])
-
-  @@map("campaign_midias")
-}
-
-enum MidiaTypeEnum {
-  image
-  video
-}
-
-model CampaignUpdate {
-  id          String    @id @default(uuid())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
-  title       String?
-  description String?
-  campaignId  String?
-  userId      String?
-
-  campaign Campaign? @relation(fields: [campaignId], references: [id])
-  user     User?     @relation(fields: [userId], references: [id])
-
-  @@map("campaign_updates")
+  @@map("profiles")
 }
 
 model Campaign {
-  id                    String          @id @default(uuid())
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime?       @updatedAt
-  categoryId            String?
+  id                    Int       @id @default(autoincrement())
+  title                 String?
   description           String?
+  beneficiaryName       String?
   fundraisingGoal       Float?
   fundsRaised           Float?
   imageCoverUrl         String?
   institution           String?
   location              String?
   numberOfContributions Int?
-  ongId                 String?
   phoneNumber           String?
-  priority              Int?            @default(0)
+  priority              Int?      @default(0)
   endDate               DateTime?
-  title                 String?
-  userId                String?
   startDate             DateTime?
-  isUrgent              Boolean?        @default(false)
-  isActivate            Boolean?        @default(true)
-  beneficiaryName       String?
+  isUrgent              Boolean?  @default(false)
+  isActivate            Boolean?  @default(true)
   campaignType          String?
-  currency              String          @default("AOA")
+  currency              String    @default("AOA")
   birth                 DateTime?
-  status                CampaignStatus? @default(active)
 
-  category            Category?             @relation(fields: [categoryId], references: [id])
-  ong                 Ong?                  @relation(fields: [ongId], references: [id])
-  user                User?                 @relation(fields: [userId], references: [id])
-  CampaignComment     CampaignComment[]
-  CampaignContributor CampaignContributor[]
-  CampaignDocument    CampaignDocument[]
-  CampaignMidia       CampaignMidia[]
-  CampaignUpdate      CampaignUpdate[]
+  categoryId String?
+  ongId      String?
+  userId     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
 
   @@map("campaigns")
-}
-
-enum CampaignStatus {
-  active
-  inactive
-  pending
-  // Adicione outros status se tiver
-}
-
-model Category {
-  id          String   @id
-  name        String   @unique
-  description String?
-  createdAt   DateTime @default(now())
-
-  campaigns Campaign[]
-
-  @@map("categories")
-}
-
-model Community {
-  id          String   @id @default(dbgenerated("gen_random_uuid()"))
-  createdAt   DateTime @default(now())
-  userId      String?
-  name        String?
-  description String?
-  image       String?
-  banner      String?
-
-  profile User? @relation(fields: [id], references: [id])
-
-  @@map("communities")
-}
-
-model Event {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()"))
-  ongId              String?
-  userId             String?
-  title              String?
-  location           String?
-  description        String?
-  backgroundImageUrl String?
-  startDate          DateTime?
-  endDate            DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @default(now())
-
-  ong  Ong?  @relation(fields: [ongId], references: [id])
-  user User? @relation(fields: [userId], references: [id])
-
-  @@map("events")
-}
-
-model Favorite {
-  id        String   @id @default(dbgenerated("gen_random_uuid()"))
-  userId    String?
-  itemId    String
-  itemType  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  user User? @relation(fields: [userId], references: [id])
-  // Removed unsupported @@check attribute. Enforce this constraint in the database or application logic.
-
-  @@map("favorites")
-}
-
-model Feed {
-  id          String   @id @default(dbgenerated("gen_random_uuid()"))
-  createdAt   DateTime @default(now())
-  userId      String?
-  ongId       String?
-  image       String?
-  description String?
-
-  user User? @relation(fields: [userId], references: [id])
-  ong  Ong?  @relation(fields: [ongId], references: [id])
-
-  @@map("feeds")
-}
-
-model Notification {
-  id        String   @id @default(dbgenerated("gen_random_uuid()"))
-  userId    String?
-  title     String
-  message   String
-  type      String
-  createdAt DateTime @default(now())
-  isRead    Boolean  @default(false)
-  imageUrl  String?
-
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // Removed unsupported @@check attribute. Enforce this constraint in the database or application logic.
-
-  @@map("notifications")
-}
-
-model Ong {
-  id              String    @id @default(dbgenerated("gen_random_uuid()"))
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime? @default(now())
-  about           String?
-  bio             String?
-  coverImageUrl   String?
-  isVerified      Boolean?  @default(false)
-  mission         String?
-  name            String?
-  phoneNumber     String?
-  profileImageUrl String?
-  servicesNumber  BigInt?   @default(0)
-  supportsNumber  BigInt?   @default(0)
-  userId          String?
-  vision          String?
-  status          String    @default("pending")
-  email           String?
-  website         String?
-
-  user        User?         @relation(fields: [userId], references: [id])
-  // Removed unsupported @@check attribute. Enforce this constraint in the database or application logic.
-  Blog        Blog[]
-  Campaign    Campaign[]
-  Event       Event[]
-  Feed        Feed[]
-  OngDocument OngDocument[]
-
-  @@map("ongs")
-}
-
-model OngDocument {
-  id                          String    @id @default(dbgenerated("gen_random_uuid()"))
-  userId                      String?
-  ongId                       String?
-  statutesConstitutiveAct     String
-  declarationGoodStanding     String
-  minutesConstitutiveAssembly String
-  publicDeed                  String
-  registrationCertificate     String?
-  nif                         String
-  biRepresentative            String
-  status                      String    @default("pending")
-  createdAt                   DateTime  @default(now())
-  updatedAt                   DateTime? @default(now())
-
-  ong  Ong?  @relation(fields: [ongId], references: [id])
-  user User? @relation(fields: [userId], references: [id])
-  // Removed unsupported @@check attribute. Enforce this constraint in the database or application logic.
-
-  @@map("ongs_documents")
-}
-
-model Payment {
-  id          String   @id @default(dbgenerated("gen_random_uuid()"))
-  status      String?
-  signature   String?
-  identifier  String?
-  paymentTrx  String?
-  amount      Float?
-  paymentType String?
-  currency    String?
-  createdAt   DateTime @default(now())
-
-  @@map("payments")
-}
-
-model User {
-  id                  String                @id
-  firstName           String?
-  email               String?               @unique
-  avatarUrl           String?
-  bio                 String?
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now())
-  location            String?
-  isVerified          Boolean?              @default(false)
-  role                UserRole?
-  donationQtd         BigInt                @default(0)
-  campaignQtd         BigInt                @default(0)
-  lastName            String?
-  fullName            String?
-  phoneNumber         String?
-  Blog                Blog[]
-  CampaignComment     CampaignComment[]
-  CampaignContributor CampaignContributor[]
-  CampaignDocument    CampaignDocument[]
-  CampaignMidia       CampaignMidia[]
-  CampaignUpdate      CampaignUpdate[]
-  Campaign            Campaign[]
-  Community           Community[]
-  Event               Event[]
-  Favorite            Favorite[]
-  Feed                Feed[]
-  Notification        Notification[]
-  Ong                 Ong[]
-  OngDocument         OngDocument[]
-  UserFcmToken        UserFcmToken?
-
-  @@map("users")
-}
-
-model UserFcmToken {
-  id        String   @id
-  userId    String?  @unique
-  fcmToken  String   @unique
-  createdAt DateTime @default(now())
-
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("user_fcm_tokens")
-}
-
-enum UserRole {
-  donor
-  recipient
-  admin
 }
