@@ -1,19 +1,13 @@
-import { IsEmail, IsEnum, IsOptional, IsString, Length } from 'class-validator';
-
-export enum Role {
-  USER = 'USER',
-  ADMIN = 'ADMIN',
-}
+import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import { Role } from 'generated/prisma/client';
 
 export class CreateUserDto {
   @IsOptional()
   @IsString()
-  @Length(1, 50)
   firstName?: string;
 
   @IsOptional()
   @IsString()
-  @Length(1, 50)
   lastName?: string;
 
   @IsOptional()
@@ -23,6 +17,7 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
+  @IsOptional()
   @IsEnum(Role)
-  role: Role;
+  role?: Role;
 }
