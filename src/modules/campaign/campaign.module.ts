@@ -7,7 +7,7 @@ import { GetCampaignsUseCase } from './application/use-cases/get-campaigns.use-c
 import { PrismaModule } from 'src/core/prisma/prisma.module';
 
 @Module({
-  imports: [PrismaModule], // 👈 IMPORTANTE
+  imports: [PrismaModule],
   controllers: [CampaignController],
   providers: [
     CampaignMapper,

@@ -85,6 +85,9 @@ Prisma.NullTypes = {
  * Enums
  */
 exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
+  ReadUncommitted: 'ReadUncommitted',
+  ReadCommitted: 'ReadCommitted',
+  RepeatableRead: 'RepeatableRead',
   Serializable: 'Serializable'
 });
 
@@ -178,6 +181,11 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+};
+
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
@@ -229,7 +237,7 @@ const config = {
   "datasourceNames": [
     "db"
   ],
-  "activeProvider": "sqlite",
+  "activeProvider": "postgresql",
   "inlineDatasources": {
     "db": {
       "url": {
@@ -238,8 +246,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        Int        @id @default(autoincrement())\n  firstName String?\n  lastName  String?\n  fullName  String?\n  email     String     @unique\n  role      String     @default(\"USER\")\n  profile   Profile?\n  createdAt DateTime   @default(now())\n  updatedAt DateTime   @default(now())\n  Campaign  Campaign[]\n  Ong       Ong[]\n\n  @@map(\"users\")\n}\n\nmodel Profile {\n  id          Int      @id @default(autoincrement())\n  avatarUrl   String?\n  bio         String?\n  location    String?\n  isVerified  Boolean? @default(false)\n  phoneNumber String?\n  donationQtd BigInt   @default(0)\n  campaignQtd BigInt   @default(0)\n  user        User     @relation(fields: [userId], references: [id])\n  userId      Int      @unique\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @default(now())\n\n  @@map(\"profiles\")\n}\n\nmodel Campaign {\n  id                    Int       @id @default(autoincrement())\n  title                 String?\n  description           String?\n  beneficiaryName       String?\n  fundraisingGoal       Float?\n  fundsRaised           Float?\n  imageCoverUrl         String?\n  institution           String?\n  location              String?\n  latitude              Float?\n  longitude             Float?\n  numberOfContributions Int?\n  phoneNumber           String?\n  priority              Int?      @default(0)\n  endDate               DateTime?\n  startDate             DateTime?\n  isUrgent              Boolean?  @default(false)\n  isActivate            Boolean?  @default(true)\n  campaignType          String?\n  currency              String    @default(\"AOA\")\n  birth                 DateTime?\n  categoryId            Int?\n  ongId                 Int?\n  userId                Int?\n  createdAt             DateTime  @default(now())\n  updatedAt             DateTime  @default(now())\n  Category              Category? @relation(fields: [categoryId], references: [id])\n  User                  User?     @relation(fields: [userId], references: [id])\n  Ong                   Ong?      @relation(fields: [ongId], references: [id])\n\n  @@map(\"campaigns\")\n}\n\nmodel Category {\n  id          Int        @id @default(autoincrement())\n  name        String     @unique\n  description String?\n  createdAt   DateTime   @default(now())\n  Campaign    Campaign[]\n\n  @@map(\"categories\")\n}\n\nmodel Ong {\n  id              Int        @id @default(autoincrement())\n  about           String?\n  bio             String?\n  coverImageUrl   String?\n  isVerified      Boolean?   @default(false)\n  mission         String?\n  name            String?\n  phoneNumber     String?\n  profileImageUrl String?\n  servicesNumber  BigInt?    @default(0)\n  supportsNumber  BigInt?    @default(0)\n  vision          String?\n  status          String     @default(\"pending\")\n  email           String?\n  website         String?\n  location        String?\n  latitude        Float?\n  longitude       Float?\n  createdAt       DateTime   @default(now())\n  updatedAt       DateTime?  @default(now())\n  userId          Int\n  user            User?      @relation(fields: [userId], references: [id])\n  Campaign        Campaign[]\n\n  @@map(\"ongs\")\n}\n",
-  "inlineSchemaHash": "9fae793b1f67bbcf8a6e1e131a3c4541f6187557af456e8545b80da4f618957a",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        Int        @id @default(autoincrement())\n  firstName String?\n  lastName  String?\n  fullName  String?\n  email     String     @unique\n  role      String     @default(\"USER\")\n  profile   Profile?\n  createdAt DateTime   @default(now())\n  updatedAt DateTime   @default(now())\n  Campaign  Campaign[]\n  Ong       Ong[]\n\n  @@map(\"users\")\n}\n\nmodel Profile {\n  id          Int      @id @default(autoincrement())\n  avatarUrl   String?\n  bio         String?\n  location    String?\n  isVerified  Boolean? @default(false)\n  phoneNumber String?\n  donationQtd BigInt   @default(0)\n  campaignQtd BigInt   @default(0)\n  user        User     @relation(fields: [userId], references: [id])\n  userId      Int      @unique\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @default(now())\n\n  @@map(\"profiles\")\n}\n\nmodel Campaign {\n  id                    Int       @id @default(autoincrement())\n  title                 String?\n  description           String?\n  beneficiaryName       String?\n  fundraisingGoal       Float?\n  fundsRaised           Float?\n  imageCoverUrl         String?\n  institution           String?\n  location              String?\n  latitude              Float?\n  longitude             Float?\n  numberOfContributions Int?\n  phoneNumber           String?\n  priority              Int?      @default(0)\n  endDate               DateTime?\n  startDate             DateTime?\n  isUrgent              Boolean?  @default(false)\n  isActivate            Boolean?  @default(true)\n  campaignType          String?\n  currency              String    @default(\"AOA\")\n  birth                 DateTime?\n  categoryId            Int?\n  ongId                 Int?\n  userId                Int?\n  createdAt             DateTime  @default(now())\n  updatedAt             DateTime  @default(now())\n  Category              Category? @relation(fields: [categoryId], references: [id])\n  User                  User?     @relation(fields: [userId], references: [id])\n  Ong                   Ong?      @relation(fields: [ongId], references: [id])\n\n  @@map(\"campaigns\")\n}\n\nmodel Category {\n  id          Int        @id @default(autoincrement())\n  name        String     @unique\n  description String?\n  createdAt   DateTime   @default(now())\n  Campaign    Campaign[]\n\n  @@map(\"categories\")\n}\n\nmodel Ong {\n  id              Int        @id @default(autoincrement())\n  about           String?\n  bio             String?\n  coverImageUrl   String?\n  isVerified      Boolean?   @default(false)\n  mission         String?\n  name            String?\n  phoneNumber     String?\n  profileImageUrl String?\n  servicesNumber  BigInt?    @default(0)\n  supportsNumber  BigInt?    @default(0)\n  vision          String?\n  status          String     @default(\"pending\")\n  email           String?\n  website         String?\n  location        String?\n  latitude        Float?\n  longitude       Float?\n  createdAt       DateTime   @default(now())\n  updatedAt       DateTime?  @default(now())\n  userId          Int\n  user            User?      @relation(fields: [userId], references: [id])\n  Campaign        Campaign[]\n\n  @@map(\"ongs\")\n}\n",
+  "inlineSchemaHash": "a49c483a72d172d2128263cff42f1fb155a5592b464ec6a8b91a971153d0619e",
   "copyEngine": true
 }
 
